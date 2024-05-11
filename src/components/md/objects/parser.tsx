@@ -31,6 +31,7 @@ export class Parser {
                 this.add(list, this.asterisk());
                 break;
             case TokenType.DoubleAsterisk:
+                this.add(list, this.asterisk(TokenType.DoubleAsterisk));
                 break;
             case TokenType.Hashtag:
                 this.add(list, this.hashTag());
@@ -62,13 +63,16 @@ export class Parser {
         this.current++;
     }
 
-    private asterisk(): ReactNode {
+    private asterisk(type: TokenType = TokenType.Asterisk): ReactNode {
         const bold: ReactNode[] = [];
         const others: ReactNode[] = [];
 
-        this.runWrappedLine(bold, others, TokenType.Asterisk);
+        this.runWrappedLine(bold, others, type);
 
-        const op = this.operators.bold;
+        const op =
+            type == TokenType.Asterisk
+                ? this.operators.italics
+                : this.operators.bold;
 
         this.add(others, this.newline());
 
@@ -149,8 +153,8 @@ export class Parser {
         type: TokenType
     ) {
         if (this.runLineUntilType(wrapped, type) == TokenType.Newline) {
-            Error.logMisingSymbolSyntaxError(type, this.line);
-            this.isError = true;
+            //Error.logMisingSymbolSyntaxError(type, this.line);
+            //this.isError = true;
             return;
         }
 

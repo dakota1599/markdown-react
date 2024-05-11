@@ -13,8 +13,66 @@ export class Scanner {
             this.start = this.current;
             this.scanToken();
         }
-
+        console.log(this.tokens);
+        //this.organize();
         return this.tokens;
+    }
+
+    private organize() {
+        const stack: Token[] = [];
+        let start = 0,
+            end = 0;
+        let record = false,
+            flip = false;
+
+        this.tokens.forEach((t, i) => {
+            switch (t.type) {
+                case TokenType.Asterisk:
+                case TokenType.DoubleAsterisk:
+                    record = !record;
+                    flip = true;
+            }
+
+            if (flip) {
+                flip = false;
+                if (!record) {
+                    end = i;
+                    this.processStack(stack, start, end);
+                } else {
+                    start = i;
+                }
+            }
+
+            if (record) {
+                stack.push(t);
+            }
+        });
+    }
+
+    private processStack(stack: Token[], start: number, end: number) {
+        const ops: Token[] = [];
+        const text: Token[] = [];
+        stack.forEach((s) => {
+            console.log(s);
+            if (s.type == TokenType.Text) text.push(s);
+            else ops.push(s);
+        });
+
+        const res: Token[] = [];
+
+        Array.prototype.push.apply(res, ops);
+        ops.reverse();
+        Array.prototype.push.apply(res, text);
+        Array.prototype.push.apply(res, ops);
+
+        console.log(res);
+
+        console.log(start);
+        console.log(end);
+
+        for (let i = start, j = 0; i <= end && j < res.length; i++, j++) {
+            this.tokens[i] = res[j];
+        }
     }
 
     private peek = () => (this.isAtEnd() ? "\0" : this.text[this.current]);

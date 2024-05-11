@@ -1,4 +1,13 @@
-import { H1, H2, H3, Operators, OperatorType, Strong, Text } from "../Md.types";
+import {
+    Em,
+    H1,
+    H2,
+    H3,
+    Operators,
+    OperatorType,
+    Strong,
+    Text,
+} from "../Md.types";
 
 // export const defaultOperators: Operator[] = [
 //   { name: OperatorType.Asterisk, component: <i /> },
@@ -11,9 +20,10 @@ import { H1, H2, H3, Operators, OperatorType, Strong, Text } from "../Md.types";
 // ];
 
 export const defaultOperators: Operators = {
-  h1: H1,
-  h2: H2,
-  h3: H3,
-  bold: Strong,
-  text: Text,
+    h1: H1,
+    h2: H2,
+    h3: H3,
+    italics: Em,
+    bold: Strong,
+    text: Text,
 };
