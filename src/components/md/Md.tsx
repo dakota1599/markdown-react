@@ -2,16 +2,16 @@ import { MdProps } from "./Md.types";
 import { Parser, Scanner, defaultOperators } from "./objects";
 
 export const Md = ({
-  text,
-  style = {},
-  operators = defaultOperators,
+    text,
+    style = {},
+    operators = defaultOperators,
 }: MdProps) => {
-  const scanner = new Scanner(text);
-  const tokens = scanner.scan();
+    const scanner = new Scanner(text);
+    const tokens = scanner.scan();
 
-  const parser = new Parser(tokens, operators);
+    const parser = new Parser(tokens, operators);
+    // console.log(tokens);
+    const res = parser.parse();
 
-  const res = parser.parse();
-
-  return <span style={style}>{res}</span>;
+    return <span style={style}>{res}</span>;
 };
