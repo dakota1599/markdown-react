@@ -1,7 +1,10 @@
 import { ErrorType, TokenType } from "../Md.types";
 
 export class Error {
+    public static active = false;
+
     static log(errorType: ErrorType, errorMessage: string) {
+        if (!Error.active) return;
         console.error(`[${errorType.toUpperCase()} Error] ${errorMessage}`);
     }
 

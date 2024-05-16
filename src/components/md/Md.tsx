@@ -10,7 +10,7 @@ export const Md = ({
     const tokens = scanner.scan();
 
     const parser = new Parser(tokens, operators);
-    // console.log(tokens);
+    console.log(tokens);
     const res = parser.parse();
 
     return <span style={style}>{res}</span>;

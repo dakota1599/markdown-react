@@ -3,6 +3,7 @@ import { Token, TokenType } from "../Md.types";
 export class Scanner {
     private current = 0;
     private start = 0;
+    private line = 0;
     private tokens: Token[] = [];
     constructor(private text: string) {
         this.text = this.text.trim() + "\n";
@@ -14,6 +15,7 @@ export class Scanner {
             this.scanToken();
         }
 
+        this.organizeLine();
         return this.tokens;
     }
 
@@ -43,8 +45,26 @@ export class Scanner {
         }
     }
 
+    private organizeLine() {
+        let open = false
+        for (let i = this.line; i+1 < this.tokens.length; i++) {
+            if (this.tokens[i].type == TokenType.DoubleAsterisk && this.tokens[i + 1].type == TokenType.Asterisk) {
+                if (!open) {
+                    open = true;
+                    continue;
+                }
+    
+                const hold = this.tokens[i]
+                this.tokens[i] = this.tokens[i + 1]
+                this.tokens[i + 1] = hold;
+            }
+        }
+    }
+
     private newline() {
+        this.organizeLine();
         this.addToken(TokenType.Newline, "\n");
+        this.line = this.tokens.length;
     }
 
     private alphaNum() {
