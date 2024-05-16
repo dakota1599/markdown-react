@@ -6,6 +6,7 @@ import React from "react";
 export class Parser {
     private current = 0;
     private line = 1;
+    private stopTypes: TokenType[] = []
     private isError = false;
     private react: ReactNode[] = [];
     constructor(private tokens: Token[], private operators: Operators) {}
@@ -24,8 +25,8 @@ export class Parser {
         );
     }
 
-    private _parse(list: ReactNode[]) {
-        if (this.isError) return;
+    private _parse(list: ReactNode[], end: number = this.tokens.length) {
+        if (this.current == end || this.isError) return;
         switch (this.tokens[this.current].type) {
             case TokenType.Asterisk:
                 this.add(list, this.asterisk());
@@ -64,24 +65,26 @@ export class Parser {
     }
 
     private asterisk(type: TokenType = TokenType.Asterisk): ReactNode {
-        const bold: ReactNode[] = [];
-        const others: ReactNode[] = [];
+        const ast: ReactNode[] = [];
+        let end = this.current+1;
+        for (let i = end; this.tokens[i].type != TokenType.Newline; i++) {
+            if (this.tokens[i].type != type) continue;
+            
+            end = i;
+            break;
+        }
 
-        this.runWrappedLine(bold, others, type);
+        if (end == this.current) return;
+
+        this.runLineUntil(ast, end);
+        if (ast.length <= 0) return;
 
         const op =
             type == TokenType.Asterisk
                 ? this.operators.italics
                 : this.operators.bold;
 
-        this.add(others, this.newline());
-
-        return (
-            <>
-                {this.createElement(op, bold)}
-                {this.createElement(React.Fragment, others)}
-            </>
-        );
+        return this.createElement(op, ast);
     }
 
     private hashTag(): ReactNode {
@@ -137,29 +140,12 @@ export class Parser {
         }
     }
 
-    private runLineUntilType(list: ReactNode[], until: TokenType) {
+    private runLineUntil(list: ReactNode[], until: number) {
         this.current++;
         while (!this.isAtEnd()) {
-            if (this.tokens[this.current].type == TokenType.Newline)
-                return TokenType.Newline;
-            if (this.tokens[this.current].type == until) return until;
-            this._parse(list);
-        }
-    }
-
-    private runWrappedLine(
-        wrapped: ReactNode[],
-        others: ReactNode[],
-        type: TokenType
-    ) {
-        if (this.runLineUntilType(wrapped, type) == TokenType.Newline) {
-            //Error.logMisingSymbolSyntaxError(type, this.line);
-            //this.isError = true;
-            return;
-        }
-
-        while (this.runLineUntilType(others, type) == type) {
-            Array.prototype.push.apply(wrapped, others);
+            //if (this.tokens[this.current].type == TokenType.Newline) return;
+            if (this.current == until) return;
+            this._parse(list, until);
         }
     }
 

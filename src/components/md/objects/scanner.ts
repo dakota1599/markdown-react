@@ -3,6 +3,7 @@ import { Token, TokenType } from "../Md.types";
 export class Scanner {
     private current = 0;
     private start = 0;
+    private line = 0;
     private tokens: Token[] = [];
     constructor(private text: string) {
         this.text = this.text.trim() + "\n";
@@ -13,66 +14,9 @@ export class Scanner {
             this.start = this.current;
             this.scanToken();
         }
-        console.log(this.tokens);
-        //this.organize();
+
+        this.organizeLine();
         return this.tokens;
-    }
-
-    private organize() {
-        const stack: Token[] = [];
-        let start = 0,
-            end = 0;
-        let record = false,
-            flip = false;
-
-        this.tokens.forEach((t, i) => {
-            switch (t.type) {
-                case TokenType.Asterisk:
-                case TokenType.DoubleAsterisk:
-                    record = !record;
-                    flip = true;
-            }
-
-            if (flip) {
-                flip = false;
-                if (!record) {
-                    end = i;
-                    this.processStack(stack, start, end);
-                } else {
-                    start = i;
-                }
-            }
-
-            if (record) {
-                stack.push(t);
-            }
-        });
-    }
-
-    private processStack(stack: Token[], start: number, end: number) {
-        const ops: Token[] = [];
-        const text: Token[] = [];
-        stack.forEach((s) => {
-            console.log(s);
-            if (s.type == TokenType.Text) text.push(s);
-            else ops.push(s);
-        });
-
-        const res: Token[] = [];
-
-        Array.prototype.push.apply(res, ops);
-        ops.reverse();
-        Array.prototype.push.apply(res, text);
-        Array.prototype.push.apply(res, ops);
-
-        console.log(res);
-
-        console.log(start);
-        console.log(end);
-
-        for (let i = start, j = 0; i <= end && j < res.length; i++, j++) {
-            this.tokens[i] = res[j];
-        }
     }
 
     private peek = () => (this.isAtEnd() ? "\0" : this.text[this.current]);
@@ -101,8 +45,26 @@ export class Scanner {
         }
     }
 
+    private organizeLine() {
+        let open = false
+        for (let i = this.line; i+1 < this.tokens.length; i++) {
+            if (this.tokens[i].type == TokenType.DoubleAsterisk && this.tokens[i + 1].type == TokenType.Asterisk) {
+                if (!open) {
+                    open = true;
+                    continue;
+                }
+    
+                const hold = this.tokens[i]
+                this.tokens[i] = this.tokens[i + 1]
+                this.tokens[i + 1] = hold;
+            }
+        }
+    }
+
     private newline() {
+        this.organizeLine();
         this.addToken(TokenType.Newline, "\n");
+        this.line = this.tokens.length;
     }
 
     private alphaNum() {

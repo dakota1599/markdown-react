@@ -58,6 +58,7 @@ export const Text = (props: React.ComponentProps<"span">) => {
 
 // Enums
 export enum TokenType {
+    None,
     Text,
     Asterisk,
     Hashtag,
