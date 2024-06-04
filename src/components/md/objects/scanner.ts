@@ -39,6 +39,9 @@ export class Scanner {
             case "\n":
                 this.newline();
                 break;
+            case ">":
+                this.caret();
+                break;
             default:
                 this.alphaNum();
                 break;
@@ -59,6 +62,16 @@ export class Scanner {
                 this.tokens[i + 1] = hold;
             }
         }
+    }
+
+    private caret() {
+        this.addToken(TokenType.Caret, ">");
+        this.start++;
+        while (this.peek() != "\n") {
+            this.advance();
+        }
+
+        this.addToken(TokenType.Text, this.text.slice(this.start, this.current));
     }
 
     private newline() {

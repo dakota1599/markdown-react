@@ -43,6 +43,8 @@ export class Parser {
             case TokenType.TripleHashtag:
                 this.add(list, this.tripleHashTag());
                 break;
+            case TokenType.Caret:
+                this.add(list, this.caret());
             case TokenType.Underscore:
                 break;
             case TokenType.DoubleUnderscore:
@@ -62,6 +64,15 @@ export class Parser {
                 break;
         }
         this.current++;
+    }
+
+    private caret() {
+        const op = this.operators.blockquote;
+        this.current++;
+
+        const text = this.text();
+
+        return this.createElement(op, [text]);
     }
 
     private asterisk(type: TokenType = TokenType.Asterisk): ReactNode {
